@@ -84,6 +84,28 @@ when not running as root. (Gentoo: dev-tcltk/expect)
 when not running as root. Guaranteed to be present on a
 fully working Linux system.
 
+Also, you need to have the `thinkpad_acpi` module.
+If you build your Kernel yourself, make sure the following are enabled:
+
+```
+Device Drivers --->
+	[*] X86 Platform Specific Device Drivers  --->  
+		<M>   ThinkPad ACPI Laptop Extras          
+```
+
+Then, make sure the driver is available:
+
+`lsmod | grep thinkpad_acpi`
+
+Then, write the following to `/etc/modprobe.d/thinkpad.conf`:
+
+```
+options thinkpad_acpi fan_control=1
+```
+
+Now, you should reboot. After rebooting, you should be able to
+modify your ThinkPad's fan speed.
+
 ## Installation
 (See [Requirements](#Requirements))
 
