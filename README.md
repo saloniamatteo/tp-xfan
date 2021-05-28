@@ -54,18 +54,23 @@ Note that Debugging and Verbosity only output to the console.
 
 ## Screenshots
 Start Menu: the initial screen, shown when `tp-xfan` is opened.
+
 ![Start Menu](https://raw.githubusercontent.com/saloniamatteo/tp-xfan/master/pics/1-init-scr.png)
 
 Info Screen: showing info.
+
 ![Info Screen](https://raw.githubusercontent.com/saloniamatteo/tp-xfan/master/pics/2-info-scr.png)
 
 Password Screen: `tp-xfan` is asking the root password.
+
 ![Password Screen](https://raw.githubusercontent.com/saloniamatteo/tp-xfan/master/pics/3-pass-scr.png)
 
 Speed Set: `tp-xfan` succesfully set the fan speed.
+
 ![Speed Set](https://raw.githubusercontent.com/saloniamatteo/tp-xfan/master/pics/4-speed-set.png)
 
 Exit Confirm: `tp-xfan` is asking the user if they really want to exit.
+
 ![Exit Confirm](https://raw.githubusercontent.com/saloniamatteo/tp-xfan/master/pics/5-exit-confirm.png)
 
 ## Requirements
