@@ -76,11 +76,11 @@ Exit Confirm: `tp-xfan` is asking the user if they really want to exit.
 ## Requirements
 In order to run `tp-xfan`, you need the following packages:
 
-+ `xforms` (required): provides the core Forms functionality.
++ `xforms` (**required**): provides the core Forms functionality.
 (Gentoo: x11-libs/xforms, others: http://xforms-toolkit.org)
-+ `expect` (optional): used for escalating privileges,
++ `expect` (<u>optional</u>): used for escalating privileges,
 when not running as root. (Gentoo: dev-tcltk/expect)
-+ Linux's `su` (optional): used for escalating privileges,
++ Linux's `su` (<u>optional</u>): used for escalating privileges,
 when not running as root. Guaranteed to be present on a
 fully working Linux system.
 
