@@ -1,7 +1,16 @@
-/*
- * ThinkPad Fan Control
- * using XForms.
-*/
+/* See LICENSE file for copyright and license details.
+ *
+ * tp-xfan (ThinkPad XForms Fan) is a program which
+ * uses the XForms C library to display in a beautiful
+ * way some controls, in order to modify the speed of
+ * the ThinkPad's fan. It supports automatic speed
+ * (level 0), all the way up to maximum speed (level 8).
+ *
+ * Automatic speed control is planned for a future release.
+ *
+ * Made by Salonia Matteo <saloniamatteo@pm.me>
+ *
+ */
 
 #define _GNU_SOURCE
 #define _FORTIFY_SOURCE 2
