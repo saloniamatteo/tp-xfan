@@ -319,7 +319,7 @@ main(int argc, char **argv)
 				"-d		Enable debugging.\n"
 				"-i		Print information and exit, without opening XForms.\n"
 				"-h		Print this help and exit, without opening XForms.\n"
-				"-p path	Which directory contains the apply.sh script.\n"
+				"-p path\t	Which directory contains the apply.sh script.\n"
 				"-v		Be more verbose. (writes info to the console)\n",
 				PACKAGE_STRING, PACKAGE_BUGREPORT, PACKAGE_DONATE);
 			return 0;

@@ -116,7 +116,9 @@ Normally, users should run the following commands, to install `tp-xfan`:
 ```bash
 ./configure
 make
-make install
+# the following should be ran as root,
+# or by prepending "sudo" or "doas".
+make install install-data
 ```
 
 This will install `tp-xfan`, and the default `apply.sh` script (in /usr/local/share/quiz)
