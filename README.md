@@ -29,12 +29,13 @@ Currently, `tp-xfan` supports the following command-line flags:
 | `-v` | None     | Be more verbose                                  |
 
 ## Features
-`tp-xfan` has a lot of functionalities, including:
+`tp-xfan` has a lot of powerful features, including:
 
 + Value Slider to choose values
 + Setting a custom directory for the apply.sh script,
 in case you don't have it in your current directory,
 nor under `/usr/local/share/tp-xfan`.
++ AFSM (Automatic Fan Speed Management); See [AFSM](#AFSM).
 + Automatic recognition of root & non-root users
 	- When running as root, no password is required,
 	and the command is executed immediately, if the
@@ -45,12 +46,30 @@ nor under `/usr/local/share/tp-xfan`.
 	- When running as a non-root user with
 	a setuid program (like sudo/doas), no
 	password is required from `tp-xfan`.
++ Local Password Caching: the password is stored in a 
+variable, which will only be accessible by `tp-xfan` itself.
 + Debugging functionalities, to see what `tp-xfan` really is doing
 even when you cannot see it.
 + Verbosity, to see if the command to set the fan speed
 actually worked or not.
 
 Note that Debugging and Verbosity only output to the console.
+
+## AFSM
+Automatic Fan Speed Management (or AFSM) is a very powerful
+feature of `tp-xfan`. It allows users to choose a CPU temperature
+threshold, the speed of the fan, and the interval (in seconds).
+
+For example, with a given threshold temperature of 50°C, AFSM will
+start the fan after the seconds provided by the interval,
+with the speed chosen by the user.
+
+So, every interval seconds, AFSM will check if the current CPU
+temperature is above the threshold: if it is, it will
+keep going, setting the fan to the speed chosen by the user;
+if the temperature is below, or equal to the threshold,
+it will immediately set the fan speed to 0 (auto),
+and it will cycle forever.
 
 ## Screenshots
 Start Menu: the initial screen, shown when `tp-xfan` is opened.
@@ -65,9 +84,9 @@ Password Screen: `tp-xfan` is asking the root password.
 
 ![Password Screen](https://raw.githubusercontent.com/saloniamatteo/tp-xfan/master/pics/3-pass-scr.png)
 
-Speed Set: `tp-xfan` succesfully set the fan speed.
+AFSM Screen: [Auto Fan Speed Management](#AFSM) screen.
 
-![Speed Set](https://raw.githubusercontent.com/saloniamatteo/tp-xfan/master/pics/4-speed-set.png)
+![AFSM Screen](https://raw.githubusercontent.com/saloniamatteo/tp-xfan/master/pics/4-afsm-scr.png)
 
 Exit Confirm: `tp-xfan` is asking the user if they really want to exit.
 

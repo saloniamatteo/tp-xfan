@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 
-AC_INIT([tp-xfan], [1.0], [saloniamatteo@pm.me])
+AC_INIT([tp-xfan], [1.1], [saloniamatteo@pm.me])
 AC_CONFIG_SRCDIR([src])
 
 # Checks for programs.
