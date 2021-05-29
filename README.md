@@ -121,7 +121,7 @@ make
 make install install-data
 ```
 
-This will install `tp-xfan`, and the default `apply.sh` script (in /usr/local/share/quiz)
+This will install `tp-xfan`, and the default `apply.sh` script (/usr/local/share/tp-xfan/apply.sh)
 
 If, for some reason, you cannot run the commands above, run `autoreconf --install`, then retry.
 
