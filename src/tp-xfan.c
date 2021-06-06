@@ -20,25 +20,26 @@
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#ifndef HAVE_PTHREAD_H
+#warning "tp-xfan requires a pthread implementation for AFSM, but found none!"
+#endif /* HAVE_PTHREAD_H */
 #else
 #define PACKAGE_BUGREPORT "saloniamatteo@pm.me"
 #define PACKAGE_STRING "tp-xfan 1.2"
-#endif
+#endif /* HAVE_CONFIG_H */
 
 /* For some reason, the following isn't defined in config.h. */
 #ifndef PACKAGE_DONATE
 #define PACKAGE_DONATE "https://saloniamatteo.top/donate.html"
-#endif
+#endif /* PACKAGE_DONATE */
 
 #include <errno.h>
 #include <forms.h>
 #include <limits.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
-
 #include "temp.h"
 
 #define DEFAULT_LOCAL_PATH	"/apply.sh"

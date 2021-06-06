@@ -11,7 +11,7 @@ AC_PROG_CC
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for header files.
-AC_CHECK_HEADERS([errno.h forms.h limits.h stdio.h stdlib.h unistd.h])
+AC_CHECK_HEADERS([errno.h forms.h limits.h stdio.h stdlib.h unistd.h pthread.h])
 
 # Custom parameter
 AC_ARG_ENABLE([cpuopts],

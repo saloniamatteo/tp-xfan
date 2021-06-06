@@ -1,1 +1,7 @@
-README.md
+News/ChangeLog for tp-xfan (ThinkPad XForms Fan).
+============================================================
+
+[Release 1.2] 06/06/2021:
+	Support multi-threading using POSIX threads
+	(pthreads). This allows users to use AFSM
+	in a non-blocking way, after pressing "Apply & Run"

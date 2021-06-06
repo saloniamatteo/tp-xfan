@@ -9,6 +9,9 @@ written using XForms (hence the name, XForms Fan).
 
 For more features, check [Features](#Features).
 
+For a list of changes and/or news, check the `NEWS`
+and `ChangeLog` files.
+
 Initially written on May 28, 2021.
 Current version can be found in `tp-xfan.c` under `src/`,
 or by running `make version` (see [Installation](#Installation))
