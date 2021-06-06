@@ -22,7 +22,7 @@
 #include "config.h"
 #else
 #define PACKAGE_BUGREPORT "saloniamatteo@pm.me"
-#define PACKAGE_STRING "tp-xfan 1.1"
+#define PACKAGE_STRING "tp-xfan 1.2"
 #endif
 
 /* For some reason, the following isn't defined in config.h. */
@@ -33,29 +33,40 @@
 #include <errno.h>
 #include <forms.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "temp.h"
 
-#define DEFAULT_LOCAL_PATH "/apply.sh"
-#define DEFAULT_SYS_PATH "/usr/local/share/tp-xfan/apply.sh"
+#define DEFAULT_LOCAL_PATH	"/apply.sh"
+#define DEFAULT_SYS_PATH	"/usr/local/share/tp-xfan/apply.sh"
+#define THINKPAD_FAN_FILE	"/proc/acpi/ibm/fan"
+
 #define DEBUG(where, ...) if (debug) fprintf(stderr, "Debug [" where "]: " __VA_ARGS__);
 
 #define DEF_TEMP 50	/* Default valslider temperature */
+#define MAX_INFO 500	/* Maximum size for thr_info objects */
 #define MAX_TEMP 100	/* Maximum valslider temperature */
 #define MIN_TEMP 40	/* Minimum valslider temperature */
 #define PASS_MAX 100	/* Password maximum length */
+
+struct thr_info {
+	FL_OBJECT *obj;
+	long data;
+} thr_info;
 
 static FL_FORM	 *current_form = {0};	/* Current active form */
 static char	 pass[PASS_MAX] = {-1};	/* Cache password, without prompting user */
 static char	 path[PATH_MAX] = {0};	/* Path containing apply.sh script */
 static char	 user_path[PATH_MAX];	/* User-defined directory that contains the script */
 static int	 debug = 0;		/* Enable Debugging */
-static int	 fan_rec = 0;		/* Copy of fan value (used to recover AFSM speed) */
+static int	 fan_rec = 7;		/* Copy of fan value (used to recover AFSM speed) */
 static int	 fan_val = 0;		/* Fan speed value */
 static int	 interval = 0;		/* AFSM interval (in seconds) */
+static int	 is_afsm_on = 0;	/* Is AFSM on? */
 static int	 temp = DEF_TEMP;	/* CPU temperature threshold */
 static int	 using_custom_path = 0;	/* Are we using a custom directory? */
 static int	 verbose = 0;		/* Verbosity */
@@ -80,6 +91,7 @@ as root, and it will not ask for a password, since EUID is 0.";
 static void set_valslider(FL_OBJECT *, int, int, int, int, int, void *, long);
 static void set_path(void);
 static int  check_root(void);
+static int  can_write_fan(void);
 static void ask_pass(void);
 static void showinfo(FL_OBJECT *, long);
 static void checkexit(FL_OBJECT *, long);
@@ -106,6 +118,7 @@ set_valslider(FL_OBJECT *obj, int min, int max, int precision, int val, int alig
 static void
 set_path(void)
 {
+	/* File descriptor */
 	FILE *fd;
 
 	/* If we aren't using a user-defined path,
@@ -176,6 +189,26 @@ check_root(void)
 	DEBUG("Check Root", "Gotten EUID: %d\n", euid);
 
 	return (euid == 0 ? 1 : 0);
+}
+
+/* Check if we can write to ThinkPad ACPI fan file */
+static int
+can_write_fan(void)
+{
+	/* File descriptor */
+	FILE *fd;
+
+	fd = fopen(THINKPAD_FAN_FILE, "w");
+
+	if (fd == NULL) {
+		DEBUG("Can Write Fan File", "Unable to write to fan file.\n");
+		return 0;
+	} else {
+		DEBUG("Can Write Fan File", "Able to write to fan file.\n");
+		fclose(fd);
+
+		return 1;
+	}
 }
 
 /* Ask password */
@@ -302,6 +335,10 @@ apply_speed(FL_OBJECT *obj, long data)
 	/* Set path */
 	set_path();
 
+	/* If data != 0, set fan_val to data */
+	if (data != 0)
+		fan_val = data;
+
 	DEBUG("Apply Speed", "Gotten fan value: %d\n", fan_val);
 
 	/* Append speed value to path */
@@ -314,10 +351,10 @@ apply_speed(FL_OBJECT *obj, long data)
 	/* Check if current user is root or not */
 	int is_root = 0;
 
-	if (check_root()) {
+	if (can_write_fan() || check_root()) {
 		is_root = 1;
-
-		DEBUG("Apply Speed", "User is root, not asking password.\n");
+		DEBUG("Apply Speed", "User can write to %s, not asking password.\n",
+					THINKPAD_FAN_FILE);
 
 	/* User is not root, ask root password */
 	} else {
@@ -369,47 +406,65 @@ set_afsm_val(FL_OBJECT *obj, long data)
 static void
 set_afsm_secs(FL_OBJECT *obj, long data)
 {
-	DEBUG("Set AFSM seconds", "Setting AMFS Interval.\n", interval);
-
+	DEBUG("Set AFSM seconds", "Setting AMFS Interval.\n");
 	interval = fl_get_slider_value(obj);
-
 	DEBUG("Set AFSM seconds", "Set AMFS Interval to %d.\n", interval);
 }
 
 /* Run AFSM */
 static void
-afsm_run(FL_OBJECT *obj, long data)
+afsm_run(struct thr_info *info)
 {
-run_afsm:
 	DEBUG("AFSM Run", "Starting AFSM.\n");
 
-	/* Check CPU temperature after interval secs */
-	fl_msleep(interval * 1000);
+	/* Get obj and data from info */
+	FL_OBJECT *obj = info->obj;
+	long data = info->data;
 
-	/* Check CPU temperature */
-	if (get_temp() <= temp) {
-		DEBUG("AFSM Run", "Current temp (%d) is less than threshold (%d).\n", get_temp(), temp);
+	/* While AFSM is active */
+	while (is_afsm_on != 0) {
+		/* Check CPU temperature after interval seconds */
+		fl_msleep(interval * 1000);
 
-		/* Set fan speed to auto */
-		fan_val = 0;
-		apply_speed(obj, data);
-		goto run_afsm;	/* Loop */
-	} else {
-		DEBUG("AFSM Run", "Current temp is greater than threshold.\n");
+		/* Check CPU temperature */
+		if (get_temp() < temp) {
+			DEBUG("AFSM Run", "Current temp (%d) is less than threshold (%d).\n",
+						get_temp(), temp);
 
-		/* Apply desired speed */
-		fan_val = fan_rec;
-		apply_speed(obj, data);
-		goto run_afsm;	/* Loop */
+			/* Set fan speed to auto */
+			DEBUG("AFSM Run", "Setting fan speed to auto.\n");
+
+			fan_val = 0;
+			apply_speed(obj, data);
+
+		} else {
+			DEBUG("AFSM Run", "Current temp (%d) is greater than (or equal to) threshold (%d).\n",
+						get_temp(), temp);
+
+			/* Set & Apply desired speed */
+			fan_val = fan_rec;
+			DEBUG("AFSM Run", "Fan value: %d; Applying speed.\n", fan_val)
+			apply_speed(obj, fan_val);
+		}
 	}
+
+	/* If we somehow jump out of the loop, reset AFSM status */
+	is_afsm_on = 0;
 }
 
 /* Stop AFSM */
 static void
-afsm_stop(FL_OBJECT *obj, long data)
+afsm_stop(struct thr_info *info)
 {
+	/* Get obj and data from info */
+	FL_OBJECT *obj = info->obj;
+	long data = info->data;
+
+	/* Reset AFSM status */
+	is_afsm_on = 0;
+
 	// data = 1 -> close AFSM form
-	if (data) {
+	if (data == 2) {
 		fl_free_form(current_form);
 		DEBUG("AFSM Stop", "Destroyed AFSM Form.\n");
 	// data = 0 -> stop AFSM
@@ -421,6 +476,69 @@ afsm_stop(FL_OBJECT *obj, long data)
 
 		DEBUG("AFSM Stop", "Set fan speed to auto.\n");
 	}
+}
+
+/* Function to multi-thread AFSM */
+static void
+afsm_thr(FL_OBJECT *obj, long data)
+{
+	DEBUG("AFSM Thread", "Starting multi-threaded AFSM.\n");
+
+	/* Variables/objects used for pthreads (only one argument
+	 * can be passed when calling pthread_create) */
+	pthread_t thr_fan, thr_stp;
+	struct thr_info info[MAX_INFO] = { 0 };
+
+	DEBUG("AFSM Thread", "Setting thread info values.\n");
+
+	info->obj = obj;
+	info->data = data;
+
+	/* Check data:
+	 * 0 -> run			(loop)
+	 * 1 -> set fan speed to auto 	(no loop)
+	 * 2 -> stop afsm		(no loop) */
+	switch (data) {
+
+	/* Run */
+	case 0:
+		DEBUG("AFSM Thread", "Gotten 0 (run).\n");
+
+		/* Before running, we need to cache the password,
+		 * in order to run automatically, so call apply_speed */
+		apply_speed(obj, data);
+
+		/* Check if is_afsm_on != 0 */
+		if (!is_afsm_on) {
+			DEBUG("AFSM Thread", "AFSM not active, starting.\n");
+
+			is_afsm_on++;
+
+			/* Create a thread, which will loop forever,
+			 * unless is_afsm_on != 0 */
+			pthread_create(&thr_fan, NULL, (void *) afsm_run, info);
+
+		/* Otherwise, do nothing */
+		} else
+			DEBUG("AFSM Thread", "AFSM is already active!\n");
+
+		break;
+
+	/* Set fan speed to auto, or stop */
+	case 1:
+	case 2:
+		if (data == 1) {
+			DEBUG("AFSM Thread", "Gotten 1 (set speed to auto).\n");
+		} else
+			DEBUG("AFSM Thread", "Gotten 2 (stop).\n");
+
+		/* Create a new thread, and wait until it finishes. */
+		pthread_create(&thr_stp, NULL, (void *) afsm_stop, info);
+		pthread_join(thr_stp, NULL);
+		break;
+	}
+
+	DEBUG("AFSM Thread", "Exiting multi-threaded AFSM.\n");
 }
 
 /* Auto Fan Speed Management */
@@ -456,15 +574,15 @@ afsm(FL_OBJECT *obj, long data)
 
 	/* Start monitoring CPU temp */
 	btn = fl_add_button(FL_NORMAL_BUTTON, 20, 170, 280, 40, "Apply & Run");
-	fl_set_object_callback(btn, afsm_run, 0);
+	fl_set_object_callback(btn, afsm_thr, 0);
 
 	/* Button to stop */
 	btn = fl_add_button(FL_NORMAL_BUTTON, 20, 220, 280, 40, "Set fan speed to auto");
-	fl_set_object_callback(btn, afsm_stop, 0);
+	fl_set_object_callback(btn, afsm_thr, 1);
 
 	/* Button to close AFSM Form */
 	btn = fl_add_button(FL_NORMAL_BUTTON, 20, 270, 280, 40, "Close");
-	fl_set_object_callback(btn, afsm_stop, 1);
+	fl_set_object_callback(btn, afsm_thr, 2);
 
 	current_form = afsm_form;
 

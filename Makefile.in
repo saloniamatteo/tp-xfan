@@ -328,6 +328,9 @@ OPTS = -Ofast
 # LDFLAGS: linker flags
 AM_LDFLAGS = -lforms
 
+# CFLAGS: additional compiler flags
+AM_CFLAGS = -Wall $(CSTD) $(LINKER) $(OPTS) $(CPUOPTS) $(AM_LDFLAGS)
+
 # Source code location
 tp_xfan_SOURCES = src/tp-xfan.c
 
@@ -853,9 +856,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-docDATA
 
 .PRECIOUS: Makefile
 
-
-# CFLAGS: additional compiler flags
-override CFLAGS = -Wall $(CSTD) $(LINKER) $(OPTS) $(CPUOPTS) $(AM_LDFLAGS)
 
 # Clean the project directory
 cleandir:

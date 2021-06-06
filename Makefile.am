@@ -21,7 +21,7 @@ AM_LDFLAGS =
 AM_LDFLAGS += -lforms
 
 # CFLAGS: additional compiler flags
-override CFLAGS = -Wall $(CSTD) $(LINKER) $(OPTS) $(CPUOPTS) $(AM_LDFLAGS)
+AM_CFLAGS = -Wall $(CSTD) $(LINKER) $(OPTS) $(CPUOPTS) $(AM_LDFLAGS)
 
 # Executable name
 bin_PROGRAMS = tp-xfan
