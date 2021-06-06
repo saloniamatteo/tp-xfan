@@ -34,6 +34,5 @@ AC_SUBST([PACKAGE_DONATE], ["https://saloniamatteo.top/donate.html"])
 # Automake
 AM_INIT_AUTOMAKE([gnu subdir-objects])
 AC_CONFIG_FILES([Makefile])
-AC_PROG_CC
 
 AC_OUTPUT

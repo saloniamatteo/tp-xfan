@@ -19,6 +19,7 @@ CPUOPTS = -march=native -mtune=native
 # LDFLAGS: linker flags
 AM_LDFLAGS =
 AM_LDFLAGS += -lforms
+AM_LDFLAGS += -lpthread
 
 # CFLAGS: additional compiler flags
 AM_CFLAGS = -Wall $(CSTD) $(LINKER) $(OPTS) $(CPUOPTS) $(AM_LDFLAGS)
