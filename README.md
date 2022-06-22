@@ -18,7 +18,7 @@ or by running `make version` (see [Installation](#Installation))
 
 If you plan to work on `tp-xfan`, be sure to read `INDENTATION`.
 
-Support this project: https://saloniamatteo.top/donate.html
+Support this project: https://salonia.it/donate.html
 
 ## Flags
 Currently, `tp-xfan` supports the following command-line flags:
@@ -151,4 +151,4 @@ If, for some reason, you cannot run the commands above, run `autoreconf --instal
 If you need help, you can:
 - Create an issue;
 - Open a pull request;
-- Send me an email [(saloniamatteo@pm.me](mailto:saloniamatteo@pm.me) or [matteo@mail.saloniamatteo.top)](mailto:matteo@mail.saloniamatteo.top).
+- Send me an email [(saloniamatteo@pm.me](mailto:saloniamatteo@pm.me) or [matteo@salonia.it)](mailto:matteo@salonia.it).
