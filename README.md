@@ -18,7 +18,8 @@ or by running `make version` (see [Installation](#Installation))
 
 If you plan to work on `tp-xfan`, be sure to read `INDENTATION`.
 
-Support this project: https://salonia.it/donate.html
+## Donate
+Support this project: [salonia.it/donate](https://salonia.it/donate)
 
 ## Flags
 Currently, `tp-xfan` supports the following command-line flags:
